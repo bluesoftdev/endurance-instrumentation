@@ -9,13 +9,11 @@ import com.bluesoft.endurance.instrumentation.Procedure;
  *
  * @author psimerd
  */
-public class ReentrantReadWriteLockHelper
-{
+public class ReentrantReadWriteLockHelper {
 
   private ReentrantReadWriteLock lock = new ReentrantReadWriteLock( true );
 
-  public <T> T readLock( Lambda<T> todo )
-  {
+  public <T> T readLock( Lambda<T> todo ) {
     boolean hasReadLock = lock.getReadHoldCount() == 1;
     if ( !hasReadLock ) {
       lock.readLock().lock();
@@ -29,23 +27,17 @@ public class ReentrantReadWriteLockHelper
     }
   }
 
-  public void readLock( Procedure todo )
-  {
-    boolean hasReadLock = lock.getReadHoldCount() == 1;
-    if ( !hasReadLock ) {
-      lock.readLock().lock();
-    }
-    try {
-      todo.func();
-    } finally {
-      if ( !hasReadLock ) {
-        lock.readLock().unlock();
+  public void readLock( final Procedure todo ) {
+    readLock( new Lambda<Void>() {
+      @Override
+      public Void func() {
+        todo.func();
+        return null;
       }
-    }
+    } );
   }
 
-  public <T> T writeLock( Lambda<T> todo )
-  {
+  public <T> T writeLock( Lambda<T> todo ) {
     boolean hasReadLock = lock.getReadHoldCount() == 1;
     if ( hasReadLock ) {
       lock.readLock().unlock();
@@ -61,20 +53,13 @@ public class ReentrantReadWriteLockHelper
     }
   }
 
-  public void writeLock( Procedure todo )
-  {
-    boolean hasReadLock = lock.getReadHoldCount() == 1;
-    if ( hasReadLock ) {
-      lock.readLock().unlock();
-    }
-    lock.writeLock().lock();
-    try {
-      todo.func();
-    } finally {
-      if ( hasReadLock ) {
-        lock.readLock().lock();
+  public void writeLock( final Procedure todo ) {
+    writeLock( new Lambda<Void>() {
+      @Override
+      public Void func() {
+        todo.func();
+        return null;
       }
-      lock.writeLock().unlock();
-    }
+    } );
   }
 }

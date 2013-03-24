@@ -10,14 +10,12 @@ import com.bluesoft.endurance.util.ReentrantReadWriteLockHelper;
  *
  * @author psimerd
  */
-public class Timing
-{
+public class Timing {
 
   private ReentrantReadWriteLockHelper lock = new ReentrantReadWriteLockHelper();
   private List<Sample> samples = new LinkedList<Sample>();
 
-  public <T> T time( Lambda<T> callBack )
-  {
+  public <T> T time( Lambda<T> callBack ) {
     long start = System.nanoTime();
     try {
       return callBack.func();
@@ -29,38 +27,29 @@ public class Timing
     }
   }
 
-  public void time( Procedure callBack )
-  {
-    long start = System.nanoTime();
-    try {
-      callBack.func();
-    } catch ( RuntimeException ex ) {
-      throw ex;
-    } finally {
-      long end = System.nanoTime();
-      recordSample( start, end );
-    }
+  public void time( final Procedure callBack ) {
+    time( new Lambda<Void>() {
+      @Override
+      public Void func() {
+        callBack.func();
+        return null;
+      }
+    } );
   }
 
-  public void recordSample( final long startNano, final long endNano )
-  {
-    lock.writeLock( new Procedure()
-    {
+  public void recordSample( final long startNano, final long endNano ) {
+    lock.writeLock( new Procedure() {
       @Override
-      public void func()
-      {
+      public void func() {
         samples.add( new Sample( startNano, endNano ) );
       }
     } );
   }
 
-  public long getMax()
-  {
-    return lock.readLock( new Lambda<Long>()
-    {
+  public long getMax() {
+    return lock.readLock( new Lambda<Long>() {
       @Override
-      public Long func()
-      {
+      public Long func() {
         long max = 0;
         for ( Sample s : samples ) {
           max = Math.max( max, s.end - s.start );
@@ -70,14 +59,11 @@ public class Timing
     } );
   }
 
-  public long getMin()
-  {
-    return lock.readLock( new Lambda<Long>()
-    {
+  public long getMin() {
+    return lock.readLock( new Lambda<Long>() {
       @Override
-      public Long func()
-      {
-        long min = 0;
+      public Long func() {
+        long min = Long.MAX_VALUE;
         for ( Sample s : samples ) {
           min = Math.min( min, s.end - s.start );
         }
@@ -86,13 +72,10 @@ public class Timing
     } );
   }
 
-  public long getAverage()
-  {
-    return lock.readLock( new Lambda<Long>()
-    {
+  public long getAverage() {
+    return lock.readLock( new Lambda<Long>() {
       @Override
-      public Long func()
-      {
+      public Long func() {
         if ( samples.isEmpty() ) {
           return 0L;
         }
@@ -105,13 +88,10 @@ public class Timing
     } );
   }
 
-  public long getStandardDev()
-  {
-    return lock.readLock( new Lambda<Long>()
-    {
+  public long getStandardDev() {
+    return lock.readLock( new Lambda<Long>() {
       @Override
-      public Long func()
-      {
+      public Long func() {
         if ( samples.isEmpty() ) {
           return 0L;
         }
@@ -122,40 +102,34 @@ public class Timing
           variance = variance * variance;
           total += variance;
         }
-        return (long) Math.sqrt( total / samples.size() );
+        return (long)Math.sqrt( total / samples.size() );
       }
     } );
   }
 
-  private class Sample
-  {
+  private class Sample {
 
     private long start;
     private long end;
 
-    public Sample( long start, long end )
-    {
+    public Sample( long start, long end ) {
       this.start = start;
       this.end = end;
     }
 
-    public long getStart()
-    {
+    public long getStart() {
       return start;
     }
 
-    public void setStart( long start )
-    {
+    public void setStart( long start ) {
       this.start = start;
     }
 
-    public long getEnd()
-    {
+    public long getEnd() {
       return end;
     }
 
-    public void setEnd( long end )
-    {
+    public void setEnd( long end ) {
       this.end = end;
     }
   }

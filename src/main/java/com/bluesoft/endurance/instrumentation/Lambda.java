@@ -4,7 +4,7 @@ package com.bluesoft.endurance.instrumentation;
  *
  * @author psimerd
  */
-public interface Lambda<R>
-{
+public interface Lambda<R> {
+
   R func();
 }

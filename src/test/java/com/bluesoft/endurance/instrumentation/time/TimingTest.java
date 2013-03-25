@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +18,6 @@ import org.testng.annotations.Test;
  * @author danap
  */
 public class TimingTest {
-
   private static final int COUNT = 100;
 
   @Test
@@ -56,8 +54,8 @@ public class TimingTest {
           long time = -1;
           try {
             do {
-              time = 30000000L + (long)(rand.nextGaussian() * expectedStandardDeviation);
-            } while (time < 0);
+              time = 30000000L + (long) (rand.nextGaussian() * expectedStandardDeviation);
+            } while ( time < 0 );
             Thread.sleep( time / 1000000L );
           } catch ( InterruptedException ex ) {
             Logger.getLogger( TimingTest.class.getName() ).log( Level.SEVERE, null, ex );
@@ -75,7 +73,8 @@ public class TimingTest {
     assert Math.abs( test.getAverage() - expectedAverage ) < 5000000 : "test.average = " + test.getAverage();
     assert Math.abs( test.getMin() - expectedMin ) < 5000000 : "test.min = " + test.getMin();
     assert Math.abs( test.getMax() - expectedMax ) < 5000000 : "test.max = " + test.getMax();
-    assert Math.abs( test.getStandardDev() - expectedStandardDeviation ) < 5000000L : "test.stdDev = " + test.getStandardDev();
+    assert Math.abs( test.getStandardDev() - expectedStandardDeviation ) < 5000000L : "test.stdDev = " + test.
+      getStandardDev();
   }
 
   @Test( /* timeOut = 4000L /**/)
@@ -99,8 +98,8 @@ public class TimingTest {
                 long time = -1;
                 try {
                   do {
-                    time = 30000000L + (long)(rand.nextGaussian() * expectedStandardDeviation);
-                  } while (time < 0);
+                    time = 30000000L + (long) (rand.nextGaussian() * expectedStandardDeviation);
+                  } while ( time < 0 );
                   Thread.sleep( time / 1000000L );
                 } catch ( InterruptedException ex ) {
                   Logger.getLogger( TimingTest.class.getName() ).log( Level.SEVERE, null, ex );
@@ -111,11 +110,11 @@ public class TimingTest {
             if ( time != -1 ) {
               totalTime.addAndGet( time );
               long exMin;
-              while ((exMin = expectedMin.get()) > time) {
+              while ( (exMin = expectedMin.get()) > time ) {
                 expectedMin.compareAndSet( exMin, time );
               }
               long exMax;
-              while ((exMax = expectedMax.get()) < time) {
+              while ( (exMax = expectedMax.get()) < time ) {
                 expectedMax.compareAndSet( exMax, time );
               }
             }
@@ -131,7 +130,7 @@ public class TimingTest {
 
     long expectedAverage = totalTime.get() / (COUNT * 5);
     assert Math.abs( test.getAverage() - expectedAverage ) < 5000000 : "expectedAverage = " + expectedAverage + ", test.average = " + test.
-            getAverage();
+      getAverage();
     assert Math.abs( test.getMin() - expectedMin.get() ) < 5000000 : "test.min = " + test.getMin();
     assert Math.abs( test.getMax() - expectedMax.get() ) < 5000000 : "test.max = " + test.getMax();
     assert Math.abs( test.getStandardDev() - expectedStandardDeviation ) < 5000000L : "test.stdDev = " + test.getStandardDev();

@@ -11,7 +11,6 @@ import com.bluesoft.endurance.util.ReentrantReadWriteLockHelper;
  * @author psimerd
  */
 public class Timing {
-
   private ReentrantReadWriteLockHelper lock = new ReentrantReadWriteLockHelper();
   private List<Sample> samples = new LinkedList<Sample>();
 
@@ -44,6 +43,10 @@ public class Timing {
         samples.add( new Sample( startNano, endNano ) );
       }
     } );
+  }
+
+  public int getCount() {
+    return samples.size();
   }
 
   public long getMax() {
@@ -102,13 +105,12 @@ public class Timing {
           variance = variance * variance;
           total += variance;
         }
-        return (long)Math.sqrt( total / samples.size() );
+        return (long) Math.sqrt( total / samples.size() );
       }
     } );
   }
 
   private class Sample {
-
     private long start;
     private long end;
 

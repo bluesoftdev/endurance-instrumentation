@@ -110,6 +110,12 @@ public class Timing {
     } );
   }
 
+  @Override
+  public String toString() {
+    return String.format( "Timing {\n\tcount = %d\n\taverage = %d\n\tmin = %d\n\tmax = %d\n\tstandard deviation = %d\n}",
+                          getCount(), getAverage(), getMin(), getMax(), getStandardDev() );
+  }
+
   private class Sample {
     private long start;
     private long end;

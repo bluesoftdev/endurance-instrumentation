@@ -1,0 +1,21 @@
+<configuration>
+
+  <jmxConfigurator />
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern># [%d{HH:mm:ss.SSS}] [%-5level] [%lo{1}] [%msg]%n</Pattern>
+    </encoder>
+  </appender>
+
+  <logger name="com.bluesoft">
+    <level value="DEBUG" />
+  </logger>
+
+  <root>
+    <level value="INFO" />
+    <appender-ref ref="CONSOLE" />
+  </root>
+
+</configuration>
+

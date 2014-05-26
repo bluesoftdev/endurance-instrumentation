@@ -1,3 +1,18 @@
+/*
+ * Copyright 2014 Dana H. P'Simer & BluesSoft Development, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.bluesoft.endurance.instrumentation.time;
 
 import java.util.LinkedList;
@@ -7,25 +22,40 @@ import com.bluesoft.endurance.instrumentation.Procedure;
 import com.bluesoft.endurance.util.ReentrantReadWriteLockHelper;
 
 /**
- *
- * @author psimerd
+ * A simple class that times operations and stores the samples in memory. Mostly for Test usage not Production code. See bluesoft-metrics for a
+ * production class metrics library.
+ * <p>
+ * @author danap@bluesoftdev.com &lt;Dana H. P'Simer&gt;
+ * @since 1.0.0
  */
 public class Timing {
-  private ReentrantReadWriteLockHelper lock = new ReentrantReadWriteLockHelper();
-  private List<Sample> samples = new LinkedList<Sample>();
 
+  private final ReentrantReadWriteLockHelper lock = new ReentrantReadWriteLockHelper();
+  private List<Sample> samples = new LinkedList<>();
+
+  /**
+   * Times the operation, i.e. {@link Lambda#func()}
+   * <p>
+   * @param <T>      the return type of the operation.
+   * @param callBack the operation.
+   * <p>
+   * @return the value returned by the operation.
+   */
   public <T> T time( Lambda<T> callBack ) {
     long start = System.nanoTime();
     try {
       return callBack.func();
-    } catch ( RuntimeException ex ) {
-      throw ex;
     } finally {
       long end = System.nanoTime();
       recordSample( start, end );
     }
   }
 
+  /**
+   * Times the operation, i.e. {@link Procedure#func()}.
+   * <p>
+   * @param callBack the operation.
+   */
   public void time( final Procedure callBack ) {
     time( new Lambda<Void>() {
       @Override
@@ -36,6 +66,12 @@ public class Timing {
     } );
   }
 
+  /**
+   * Records a sample for the timer.
+   * <p>
+   * @param startNano the start of the operation in nanoseconds since the beginning of the epoch.
+   * @param endNano   the end of the operation in nanoseconds since the beginning of the epoch.
+   */
   public void recordSample( final long startNano, final long endNano ) {
     lock.writeLock( new Procedure() {
       @Override
@@ -45,10 +81,16 @@ public class Timing {
     } );
   }
 
+  /**
+   * @return the count of samples.
+   */
   public int getCount() {
     return samples.size();
   }
 
+  /**
+   * @return the maximum timing for all samples.
+   */
   public long getMax() {
     return lock.readLock( new Lambda<Long>() {
       @Override
@@ -62,6 +104,9 @@ public class Timing {
     } );
   }
 
+  /**
+   * @return the minimum timing for all samples.
+   */
   public long getMin() {
     return lock.readLock( new Lambda<Long>() {
       @Override
@@ -75,6 +120,9 @@ public class Timing {
     } );
   }
 
+  /**
+   * @return the average timing for all samples.
+   */
   public long getAverage() {
     return lock.readLock( new Lambda<Long>() {
       @Override
@@ -91,6 +139,9 @@ public class Timing {
     } );
   }
 
+  /**
+   * @return the standard deviation for all samples.
+   */
   public long getStandardDev() {
     return lock.readLock( new Lambda<Long>() {
       @Override
@@ -105,11 +156,14 @@ public class Timing {
           variance = variance * variance;
           total += variance;
         }
-        return (long) Math.sqrt( total / samples.size() );
+        return (long)Math.sqrt( total / samples.size() );
       }
     } );
   }
 
+  /**
+   * @return a string representing the current values of the count, average, min, max, and standard deviation.
+   */
   @Override
   public String toString() {
     return String.format( "Timing {\n\tcount = %d\n\taverage = %d\n\tmin = %d\n\tmax = %d\n\tstandard deviation = %d\n}",
@@ -117,6 +171,7 @@ public class Timing {
   }
 
   private class Sample {
+
     private long start;
     private long end;
 

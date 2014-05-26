@@ -1,49 +1,72 @@
+/*
+ * Copyright 2014 Dana H. P'Simer & BluesSoft Development, LLC.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.bluesoft.endurance.util;
 
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
- * @author psimerd
+ * An implementation of {@link ReadWriteLock} that is faster then the one provided by the JDK.
+ * <p>
+ * @author danap@bluesoftdev.com &lt;Dana H. P'Simer&gt;
+ * @since 1.0.0
  */
 public class FastReadWriteLock implements ReadWriteLock {
-  private static final Logger LOG = LoggerFactory.getLogger( FastReadWriteLock.class );
-  private ThreadLocal<Integer> readHoldCount = new ThreadLocal<Integer>() {
-    @Override
-    protected Integer initialValue() {
-      return 0;
-    }
-  };
-  private ThreadLocal<Integer> writeHoldCount = new ThreadLocal<Integer>() {
-    @Override
-    protected Integer initialValue() {
-      return 0;
-    }
-  };
-  private AtomicInteger holdCounts = new AtomicInteger( 0 );
-  private Queue<Thread> awaitingReadLock;
-  private Queue<Thread> awaitingWriteLock;
-  private ReadLock readLock = new ReadLock();
-  private WriteLock writeLock = new WriteLock();
 
+  @SuppressWarnings( "unused" )
+  private static final Logger LOG = LoggerFactory.getLogger( FastReadWriteLock.class );
+  private final ThreadLocal<Integer> readHoldCount = new ThreadLocal<Integer>() {
+    @Override
+    protected Integer initialValue() {
+      return 0;
+    }
+  };
+  private final ThreadLocal<Integer> writeHoldCount = new ThreadLocal<Integer>() {
+    @Override
+    protected Integer initialValue() {
+      return 0;
+    }
+  };
+  private final AtomicInteger holdCounts = new AtomicInteger( 0 );
+  private final Queue<Thread> awaitingReadLock;
+  private final Queue<Thread> awaitingWriteLock;
+  private final ReadLock readLock = new ReadLock();
+  private final WriteLock writeLock = new WriteLock();
+
+  /**
+   * Create a FastReadWriteLock that does not use "fair" scheduling.
+   */
   public FastReadWriteLock() {
     this( false );
   }
 
+  /**
+   * Create a FastReadWriteLock.
+   * <p>
+   * @param rwFair true if "fair" scheduling should be used.
+   */
   public FastReadWriteLock( boolean rwFair ) {
     awaitingReadLock = new ConcurrentLinkedQueue<>();
     if ( rwFair ) {
@@ -53,11 +76,17 @@ public class FastReadWriteLock implements ReadWriteLock {
     }
   }
 
+  /**
+   * @return the read lock for this {@link ReadWriteLock}
+   */
   @Override
   public Lock readLock() {
     return readLock;
   }
 
+  /**
+   * @return the write lock for this {@link ReadWriteLock}
+   */
   @Override
   public Lock writeLock() {
     return writeLock;
@@ -102,7 +131,7 @@ public class FastReadWriteLock implements ReadWriteLock {
     int currentHoldCounts;
     do {
       currentHoldCounts = holdCounts.get();
-    } while ( !holdCounts.compareAndSet( currentHoldCounts, decrementReadCount( currentHoldCounts ) ) );
+    } while (!holdCounts.compareAndSet( currentHoldCounts, decrementReadCount( currentHoldCounts ) ));
     readHoldCount.set( readHoldCount.get() - 1 );
   }
 
@@ -123,7 +152,7 @@ public class FastReadWriteLock implements ReadWriteLock {
 
     boolean acquired = false;
     // Block while not first in queue or cannot acquire lock
-    while ( awaitingReadLock.peek() != current || !(acquired = tryAcquireReadLock()) ) {
+    while (awaitingReadLock.peek() != current || !(acquired = tryAcquireReadLock())) {
       if ( nanos != -1L ) {
         long start = System.nanoTime();
         LockSupport.parkNanos( this, nanos );
@@ -166,7 +195,7 @@ public class FastReadWriteLock implements ReadWriteLock {
     awaitingWriteLock.add( current );
 
     // Block while not first in queue or cannot acquire lock
-    while ( awaitingWriteLock.peek() != current || !(acquired = tryAcquireWriteLock()) ) {
+    while (awaitingWriteLock.peek() != current || !(acquired = tryAcquireWriteLock())) {
       if ( nanos != -1L ) {
         long start = System.nanoTime();
         LockSupport.parkNanos( this, nanos );
@@ -195,6 +224,7 @@ public class FastReadWriteLock implements ReadWriteLock {
   }
 
   private class WriteLock implements Lock {
+
     @Override
     public void lock() {
       acquireWriteLock( false, -1L );
@@ -235,6 +265,7 @@ public class FastReadWriteLock implements ReadWriteLock {
   }
 
   private class ReadLock implements Lock {
+
     @Override
     public void lock() {
       acquireReadLock( false, -1L );

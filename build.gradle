@@ -10,8 +10,10 @@ apply plugin: 'license'
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
+apply plugin: 'signing'
 
-group = 'com.bluesoft.endurance'
+group = 'com.bluesoftdev.endurance'
+archiveBaseName = project.name
 version = '1.0.0-SNAPSHOT'
 
 sourceCompatibility = '1.7'
@@ -47,17 +49,65 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
   from javadoc.destinationDir
 }
 
+signing {
+  sign configurations.archives
+}
+
 artifacts {
   archives sourcesJar
   archives javadocJar
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '1.6'
+  gradleVersion = '1.12'
 }
 
 license {
   header rootProject.file('HEADER')
   strictCheck true
   mapping('java','SLASHSTAR_STYLE')
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'BlueSoft Endurance - Instrumentation'
+        packaging 'jar'
+        description 'A library for utilities dealing with functional metaphores, timing, and concurrency'
+        url 'http://www.bitbucket.org/bluesoftdev/instrumentation'
+
+        scm {
+          connection 'scm:git@bitbucket.org:bluesoftdev/instrumentation.git'
+          developerConnection 'scm:git@bitbucket.org:bluesoftdev/instrumentation.git'
+          url 'https://bitbucket.org/bluesoftdev/instrumentation/src'
+        }
+
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id 'danap'
+            name 'Dana P\'Simer'
+            email 'danap@bluesoftdev.com'
+          }
+        }
+      }
+    }
+  }
 }

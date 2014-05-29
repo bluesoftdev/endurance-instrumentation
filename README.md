@@ -47,7 +47,8 @@ dependencies {
   compile 'com.bluesoftdev.endurance:instrumentation:1.0.0-SNAPSHOT'
 }
 ```
-
+### Others ###
+You can download the jar and sources from: [Repo](https://oss.sonatype.org/content/repositories/snapshots/com/bluesoftdev/endurance/instrumentation/1.0.0-SNAPSHOT/)
 ## Contribution guidelines ##
 
 If you would like to contribute please feel free to submit pull requests.  Some guidelines:
@@ -56,6 +57,6 @@ If you would like to contribute please feel free to submit pull requests.  Some 
 * Code Format: please follow the same basic style as the rest of the code.  There is no strict format requirements but there may be in the future.
 * Attribution and License: The license is Apache 2.0, all contributions will be licensed in the same way and you give BlueSoft Development, LLC ownership of the code.
 
-### Support ###
+## Support ##
 
 To get support, submit a ticket on this bitbucket site or send me an email at danap@bluesoftdev.com

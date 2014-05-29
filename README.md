@@ -15,6 +15,9 @@ To utilize this library in a Maven project simply add the following dependency:
 <repositories>
 ...
   <repository>
+    <releases>
+      <enabled>false</enabled>
+    </releases>
     <snapshots>
       <enabled>true</enabled>
     </snapshots>

@@ -12,12 +12,29 @@ To utilize this library in a Maven project simply add the following dependency:
 
 ```
 #!xml
-
-<dependency>
-  <groupId>com.bluesoftdev.endurance</groupId>
-  <artifactId>instrumentation</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
-</dependency>
+<repositories>
+...
+  <repository>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+    <id>oss-snapshots</id>
+    <name>Sonatype Open Source Software Repository - SNAPSHOTs</name>
+    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    <layout>default</layout>
+  </repository>
+...
+</repositories>
+...
+<dependencies>
+...
+  <dependency>
+    <groupId>com.bluesoftdev.endurance</groupId>
+    <artifactId>instrumentation</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </dependency>
+...
+</dependencies>
 ```
 
 ### Contribution guidelines ###
@@ -31,4 +48,3 @@ If you would like to contribute please feel free to submit pull requests.  Some 
 ### Support ###
 
 To get support, submit a ticket on this bitbucket site or send me an email at danap@bluesoftdev.com
-

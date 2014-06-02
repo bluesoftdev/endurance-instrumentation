@@ -1,0 +1,19 @@
+configurations { scripts }
+boolean isSnapshot = project.version.endsWith('-SNAPSHOT')
+repositories {
+  mavenLocal()
+  if ( isSnapshot ) {
+    maven {
+      url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+  } else {
+    maven {
+      url 'https://oss.sonatype.org/content/repositories/releases/'
+    }
+  }
+}
+dependencies {
+  scripts group: 'com.bluesoftdev.endurance', name: 'jar-release', ext:'gradle', version: '1.0.0-SNAPSHOT', changing: true
+}
+
+configurations.scripts.resolve().each { script -> apply from: script }
